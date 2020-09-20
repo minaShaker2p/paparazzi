@@ -190,29 +190,6 @@ class PaparazziPluginTest {
   }
 
   @Test
-  fun verifySnapshot_withoutFonts() {
-    val fixtureRoot = File("src/test/projects/verify-snapshot")
-
-    val result = gradleRunner
-        .withArguments("testDebug", "--stacktrace")
-        .runFixture(fixtureRoot) { build() }
-
-    assertThat(result.task(":preparePaparazziDebugResources")).isNotNull()
-    assertThat(result.task(":testDebugUnitTest")).isNotNull()
-
-    val snapshotsDir = File(fixtureRoot, "build/reports/paparazzi/images")
-    val snapshotFile = File(snapshotsDir, "8a7d289fef47bf8f177554eaa491fcfdf4fe1edf.png")
-    assertThat(snapshotFile.exists()).isTrue()
-
-    val goldenImage = File(fixtureRoot, "src/test/resources/launch_without_fonts.png")
-    val actualFileBytes = Files.readAllBytes(snapshotFile.toPath())
-    val expectedFileBytes = Files.readAllBytes(goldenImage.toPath())
-
-    assertThat(actualFileBytes).isEqualTo(expectedFileBytes)
-  }
-
-  @Test
-  @Ignore
   fun verifySnapshot() {
     val fixtureRoot = File("src/test/projects/verify-snapshot")
 
@@ -224,14 +201,12 @@ class PaparazziPluginTest {
     assertThat(result.task(":testDebugUnitTest")).isNotNull()
 
     val snapshotsDir = File(fixtureRoot, "build/reports/paparazzi/images")
-    val snapshotFile = File(snapshotsDir, "06eed37f8377a96128efdbfd47e28b24ecac09e6.png")
-    assertThat(snapshotFile.exists()).isTrue()
+    val snapshots = snapshotsDir.listFiles()
+    assertThat(snapshots!!).hasLength(1)
 
+    val snapshotImage = snapshots[0]
     val goldenImage = File(fixtureRoot, "src/test/resources/launch.png")
-    val actualFileBytes = Files.readAllBytes(snapshotFile.toPath())
-    val expectedFileBytes = Files.readAllBytes(goldenImage.toPath())
-
-    assertThat(actualFileBytes).isEqualTo(expectedFileBytes)
+    assertThat(snapshotImage).isSimilarTo(goldenImage).withDefaultThreshold()
   }
 
   @Test
