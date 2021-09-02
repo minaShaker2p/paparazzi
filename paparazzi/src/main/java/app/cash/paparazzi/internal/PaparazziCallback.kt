@@ -18,7 +18,6 @@ package app.cash.paparazzi.internal
 
 import app.cash.paparazzi.internal.parsers.LayoutPullParser
 import app.cash.paparazzi.internal.parsers.TagSnapshot
-import com.android.SdkConstants
 import com.android.ide.common.rendering.api.ActionBarCallback
 import com.android.ide.common.rendering.api.AdapterBinding
 import com.android.ide.common.rendering.api.ILayoutPullParser
@@ -54,6 +53,7 @@ internal class PaparazziCallback(
   private var adaptiveIconMaskPath: String? = null
   private var highQualityShadow = false
   private var enableShadow = true
+  private val loadedClasses = mutableMapOf<String, Class<*>>()
 
   @Throws(ClassNotFoundException::class)
   fun initResources() {
@@ -95,9 +95,6 @@ internal class PaparazziCallback(
     viewConstructor.isAccessible = true
     return viewConstructor.newInstance(*constructorArgs)
   }
-
-  override fun getNamespace(): String =
-    String.format(SdkConstants.NS_CUSTOM_RESOURCES_S, packageName)
 
   override fun resolveResourceId(id: Int): ResourceReference? = projectResources[id]
 
@@ -150,8 +147,6 @@ internal class PaparazziCallback(
 
   override fun getActionBarCallback(): ActionBarCallback = actionBarCallback
 
-  override fun supports(ideFeature: Int): Boolean = false
-
   override fun createXmlParserForPsiFile(fileName: String): XmlPullParser? =
     createXmlParserForFile(fileName)
 
@@ -195,6 +190,28 @@ internal class PaparazziCallback(
 
   fun setEnableShadow(enableShadow: Boolean) {
     this.enableShadow = enableShadow
+  }
+
+
+  override fun findClass(name: String): Class<*> {
+    val clazz = loadedClasses[name]
+    logger.verbose("loadClassA($name)")
+
+    try {
+      if (clazz != null) {
+        return clazz
+      }
+      val clazz2 = Class.forName(name)
+      logger.verbose("loadClassB($name)")
+      loadedClasses[name] = clazz2
+      return clazz2
+    } catch (e: LinkageError) {
+      throw ClassNotFoundException("error loading class $name", e)
+    } catch (e: ExceptionInInitializerError) {
+      throw ClassNotFoundException("error loading class $name", e)
+    } catch (e: ClassNotFoundException) {
+      throw ClassNotFoundException("error loading class $name", e)
+    }
   }
 
   private fun ResourceReference.transformStyleResource() =
