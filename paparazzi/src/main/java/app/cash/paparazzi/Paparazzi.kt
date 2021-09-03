@@ -458,6 +458,9 @@ class Paparazzi(
     InterceptorRegistrar.addMethodInterceptor(
       matrixClass, "multiplyMM", MatrixMultiplyMInterceptor::class.java
     )
+    InterceptorRegistrar.addMethodInterceptor(
+      matrixClass, "multiplyMV", MatrixMultiplyVInterceptor::class.java
+    )
   }
 
   companion object {
