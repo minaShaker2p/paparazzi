@@ -455,11 +455,12 @@ class Paparazzi(
 
   private fun registerMatrixMultiplyInterception() {
     val matrixClass = Class.forName("android.opengl.Matrix")
-    InterceptorRegistrar.addMethodInterceptor(
-      matrixClass, "multiplyMM", MatrixMultiplyMInterceptor::class.java
-    )
-    InterceptorRegistrar.addMethodInterceptor(
-      matrixClass, "multiplyMV", MatrixMultiplyVInterceptor::class.java
+    InterceptorRegistrar.addMethodInterceptors(
+      matrixClass,
+      setOf(
+        "multiplyMM" to MatrixMultiplyMInterceptor::class.java,
+        "multiplyMV" to MatrixMultiplyVInterceptor::class.java
+      )
     )
   }
 
