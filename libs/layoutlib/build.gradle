@@ -6,7 +6,7 @@ version = versions.layoutlib
 /**
  * Clone AOSP's prebuilts repo to get a prebuilt layoutlib jar. This big repo that takes a long time to clone!
  *
- * https://android.googlesource.com/platform/prebuilts/studio/layoutlib/+/refs/tags/studio-4.1.0/PREBUILT
+ * https://android.googlesource.com/platform/prebuilts/studio/layoutlib/+/refs/tags/studio-4.2.0/PREBUILT
  */
 tasks.register('cloneLayoutlib') {
   outputs.dir(repoDir)
