@@ -70,7 +70,7 @@ buildscript {
     mavenCentral()
     google()
     gradlePluginPortal()
-    //mavenLocal()
+    mavenLocal()
   }
 
   dependencies {
@@ -88,7 +88,7 @@ subprojects {
   repositories {
     mavenCentral()
     google()
-    //mavenLocal()
+    mavenLocal()
   }
 
   group = GROUP
