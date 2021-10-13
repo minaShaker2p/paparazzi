@@ -26,7 +26,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.animation.LinearInterpolator
-import com.android.tools.layoutlib.java.System_Delegate
+import com.android.internal.lang.System_Delegate
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Ignore
 import org.junit.Rule

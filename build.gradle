@@ -5,7 +5,7 @@ buildscript {
 
   // maps to this commit: https://android.googlesource.com/platform/prebuilts/studio/layoutlib/+/69acdcb
   // which runs on JDK 11
-  ext.layoutLibPrebuiltSha = '234b74a'
+  ext.layoutLibPrebuiltSha = '56c3b16'
 
   ext.versions = [
     kotlin: '1.5.21',
@@ -30,7 +30,7 @@ buildscript {
     ],
     tools: [
       common: "com.android.tools:common:${versions.androidTools}",
-      layoutlib: "com.android.tools.layoutlib:layoutlib-api:27.0.2",
+      layoutlib: "com.android.tools.layoutlib:layoutlib-api:27.2.2",
       sdkcommon: "com.android.tools:sdk-common:26.6.4",
     ],
     kxml2: 'kxml2:kxml2:2.3.0',
