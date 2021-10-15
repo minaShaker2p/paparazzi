@@ -18,6 +18,7 @@ package app.cash.paparazzi
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.os.Handler_Delegate
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.view.BridgeInflater
@@ -75,14 +76,13 @@ class Paparazzi(
   private lateinit var bridgeRenderSession: RenderSession
   private var testName: TestName? = null
 
+  lateinit var context: Context
+
   val layoutInflater: LayoutInflater
-    get() = RenderAction.getCurrentContext().getSystemService("layout_inflater") as BridgeInflater
+    get() = context.getSystemService("layout_inflater") as BridgeInflater
 
   val resources: Resources
-    get() = RenderAction.getCurrentContext().resources
-
-  val context: Context
-    get() = RenderAction.getCurrentContext()
+    get() = context.resources
 
   val contentRoot = """
         |<?xml version="1.0" encoding="utf-8"?>
@@ -137,6 +137,7 @@ class Paparazzi(
     renderSession = createRenderSession(sessionParams)
     prepareThread()
     renderSession.init(sessionParams.timeout)
+    context = RenderAction.getCurrentContext()
     Bitmap.setDefaultDensity(DisplayMetrics.DENSITY_DEVICE_STABLE)
 
     // requires LayoutInflater to be created, which is a side-effect of RenderSessionImpl.init()
@@ -145,6 +146,7 @@ class Paparazzi(
     }
 
     bridgeRenderSession = createBridgeSession(renderSession, renderSession.inflate())
+    renderSession.acquire(250L)
   }
 
   fun close() {
@@ -233,9 +235,7 @@ class Paparazzi(
         for (frame in 0 until frameCount) {
           val nowNanos = (startNanos + (frame * 1_000_000_000.0 / fps)).toLong()
           withTime(nowNanos) {
-            renderSession.acquire(250L)
             val result = renderSession.render(true)
-            renderSession.release()
             if (result.status == ERROR_UNKNOWN) {
               throw result.exception
             }
@@ -260,19 +260,23 @@ class Paparazzi(
     val frameNanos = TIME_OFFSET_NANOS + timeNanos
 
     // Execute the block at the requested time.
+    renderSession.release()
     renderSession.acquire(250L)
     System_Delegate.setBootTimeNanos(frameNanos)
     System_Delegate.setNanosTime(frameNanos)
-    renderSession.release()
 
     val choreographer = Choreographer.getInstance()
     val areCallbacksRunningField = choreographer::class.java.getDeclaredField("mCallbacksRunning")
     areCallbacksRunningField.isAccessible = true
     areCallbacksRunningField.setBoolean(choreographer, true)
 
-    bridgeRenderSession.executeCallbacks(frameNanos)
-    // because bridgeRenderSession no-op starts, then aggressively releases the main looper
-    prepareThread()
+//    val mFrameScheduledField = choreographer::class.java.getDeclaredField("mFrameScheduled")
+//    mFrameScheduledField.isAccessible = true
+//    mFrameScheduledField.setBoolean(choreographer, true)
+
+//    choreographer.postCallbackDelayedInternal_Original(Choreographer.CALLBACK_ANIMATION, {}, "", 0L)
+    Handler_Delegate.executeCallbacks()
+    Choreographer.getInstance().doFrame(frameNanos, 0)
 
     try {
       block()

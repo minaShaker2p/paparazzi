@@ -77,7 +77,9 @@ internal class Renderer(
     val attrs = File(platformDataResDir, "values" + File.separator + "attrs.xml")
     val systemProperties = DeviceConfig.loadProperties(buildProp) + mapOf(
       // We want Choreographer.USE_FRAME_TIME to be false so it uses System_Delegate.nanoTime()
-      "debug.choreographer.frametime" to "false"
+      "debug.choreographer.frametime" to "false",
+      // VSYNC needs to be false because it isn't available natively.
+      "debug.choreographer.vsync" to "false",
     )
     bridge = Bridge().apply {
       check(

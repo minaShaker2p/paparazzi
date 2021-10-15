@@ -52,6 +52,26 @@ class PaparazziTest {
     assertThat(log).containsExactly("onDraw time=0")
   }
 
+  /** We've had bugs where layoutlib tears things down after our first snapshot. */
+  @Test
+  fun multipleCallsToDrawInOneTest() {
+    val log = mutableListOf<String>()
+
+    val view = object : View(paparazzi.context) {
+      override fun onDraw(canvas: Canvas) {
+        log += "onDraw time=$time"
+      }
+    }
+
+    paparazzi.snapshot(view)
+    paparazzi.snapshot(view)
+
+    assertThat(log).containsExactly(
+      "onDraw time=0",
+      "onDraw time=0"
+    )
+  }
+
   @Test
   fun animationEvents() {
     val log = mutableListOf<String>()
