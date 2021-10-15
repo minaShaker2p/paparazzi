@@ -233,7 +233,9 @@ class Paparazzi(
         for (frame in 0 until frameCount) {
           val nowNanos = (startNanos + (frame * 1_000_000_000.0 / fps)).toLong()
           withTime(nowNanos) {
+            renderSession.acquire(250L)
             val result = renderSession.render(true)
+            renderSession.release()
             if (result.status == ERROR_UNKNOWN) {
               throw result.exception
             }
@@ -260,7 +262,14 @@ class Paparazzi(
     // Execute the block at the requested time.
     System_Delegate.setBootTimeNanos(frameNanos)
     System_Delegate.setNanosTime(frameNanos)
-    Choreographer.getInstance().doFrame(frameNanos, 0)
+
+    val choreographer = Choreographer.getInstance()
+    val areCallbacksRunningField = choreographer::class.java.getDeclaredField("mCallbacksRunning")
+    areCallbacksRunningField.isAccessible = true
+    areCallbacksRunningField.setBoolean(choreographer, true)
+
+    bridgeRenderSession.executeCallbacks(frameNanos)
+
     try {
       block()
     } finally {
