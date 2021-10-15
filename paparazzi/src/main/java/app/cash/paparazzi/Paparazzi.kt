@@ -249,6 +249,7 @@ class Paparazzi(
         }
       } finally {
         viewGroup.removeView(view)
+        renderSession.acquire(250L)
       }
     }
   }

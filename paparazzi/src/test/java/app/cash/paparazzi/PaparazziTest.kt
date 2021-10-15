@@ -18,6 +18,7 @@ package app.cash.paparazzi
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.view.Choreographer
@@ -50,6 +51,26 @@ class PaparazziTest {
     paparazzi.snapshot(view)
 
     assertThat(log).containsExactly("onDraw time=0")
+  }
+
+  /** To guard against regressions in which layoutlib tears things down after the first snapshot. */
+  @Test
+  fun multipleDrawCalls() {
+    val log = mutableListOf<String>()
+
+    class TestView(context: Context) : View(context) {
+      override fun onDraw(canvas: Canvas) {
+        log += "onDraw time=$time"
+      }
+    }
+
+    paparazzi.snapshot(TestView(paparazzi.context))
+    paparazzi.snapshot(TestView(paparazzi.context))
+
+    assertThat(log).containsExactly(
+      "onDraw time=0",
+      "onDraw time=0"
+    )
   }
 
   @Test
