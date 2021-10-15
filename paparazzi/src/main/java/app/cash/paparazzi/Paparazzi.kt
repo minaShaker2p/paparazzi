@@ -271,6 +271,8 @@ class Paparazzi(
     areCallbacksRunningField.setBoolean(choreographer, true)
 
     bridgeRenderSession.executeCallbacks(frameNanos)
+    // because bridgeRenderSession no-op starts, then aggressively releases the main looper
+    prepareThread()
 
     try {
       block()
